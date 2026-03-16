@@ -20,24 +20,29 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "venue_id")
     private Venue venue;
-
-
-
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
     @ManyToMany
-    @JoinColumn(name = "artist_id")
-    private List<Artist> artists;
+    @JoinTable(
+            name = "event_artists",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "artist_id")
+    )
+    private List<Artist> artists = new ArrayList<>();
 
     public Event() {
     }
 
-    public Event(String title, String description, LocalDateTime date, String genre, int price, Venue venue, List<Artist> artists) {
+    public Event(String title, String description, LocalDateTime date, String genre, int price, Venue venue, List<Artist> artists, User owner) {
         this.title = title;
         this.description = description;
         this.date = date;
         this.genre = genre;
         this.price = price;
         this.venue = venue;
-        this.artists = new ArrayList<>();
+        this.artists = artists;
+        this.owner = owner;
     }
 
     public Long getId() {
@@ -102,5 +107,13 @@ public class Event {
 
     public void setArtists(List<Artist> artists) {
         this.artists = artists;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 }
