@@ -14,7 +14,8 @@ public record EventResponse(
         String genre,
         int price,
         Long venueId,
-        List<Long> artistIds
+        List<Long> artistIds,
+        Long ownerId
 ) {
     public static EventResponse from(Event event) {
         List<Long> artistIds = event.getArtists()
@@ -30,7 +31,8 @@ public record EventResponse(
                 event.getGenre(),
                 event.getPrice(),
                 event.getVenue().getId(),
-                artistIds
+                artistIds,
+                event.getOwner().getId()
         );
     }
 }

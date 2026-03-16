@@ -24,7 +24,10 @@ public record EventRequest(
         @NotNull
         Long venueId,
 
-        List<Long> artistIds
+        @NotNull
+        List<Long> artistIds,
 
+        @NotNull
+        Long ownerId
 ) {
 }
