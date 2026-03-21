@@ -1,8 +1,7 @@
 package kg.akahagroup.tobokfest.controller;
 
 import kg.akahagroup.tobokfest.dto.request.UserRequest;
-import kg.akahagroup.tobokfest.enums.UserRoles;
-import kg.akahagroup.tobokfest.model.User;
+import kg.akahagroup.tobokfest.dto.response.UserResponse;
 import kg.akahagroup.tobokfest.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,22 +18,17 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getUsers() {
-        return userService.getAllUsers();
+    public List<UserResponse> getAdminsAndOrganizers() {
+        return userService.getAdminsAndOrganizers();
     }
 
-    @GetMapping
-    public List<User> getOrganizers() {
-        return userService.getAllUsers();
+    @GetMapping("/organizers")
+    public List<UserResponse> getOrganizers() {
+        return userService.getOrganizers();
     }
 
     @PostMapping("/organizer")
-    public User createOrganizer(@RequestBody UserRequest request) {
-        return userService.createOrganizer(
-                request.username(),
-                request.email(),
-                request.password(),
-                request.adminId()
-        );
+    public UserResponse createOrganizer(@RequestBody UserRequest request) {
+        return userService.createOrganizer(request);
     }
 }

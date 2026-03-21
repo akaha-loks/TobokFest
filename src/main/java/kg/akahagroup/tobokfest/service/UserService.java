@@ -1,9 +1,10 @@
 package kg.akahagroup.tobokfest.service;
 
+import kg.akahagroup.tobokfest.dto.request.UserRequest;
+import kg.akahagroup.tobokfest.dto.response.UserResponse;
 import kg.akahagroup.tobokfest.enums.UserRoles;
 import kg.akahagroup.tobokfest.model.User;
 import kg.akahagroup.tobokfest.repository.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,32 +16,36 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> getAdminsAndOrganizers() {
+        return userRepository.findByRoleIn(List.of(UserRoles.ADMIN, UserRoles.ORGANIZER))
+                .stream()
+                .map(UserResponse::from)
+                .toList();
     }
 
-    public List<User> getOrganizers() {
-        return userRepository.findByRole(UserRoles.ORGANIZER);
+    public List<UserResponse> getOrganizers() {
+        return userRepository.findByRole(UserRoles.ORGANIZER)
+                .stream()
+                .map(UserResponse::from)
+                .toList();
     }
 
-    public User createOrganizer(String username, String email, String password, Long adminId){
-        User admin = userRepository.findById(adminId).orElseThrow(() -> new RuntimeException("admin not found"));
-
-        if(admin.getRole() != UserRoles.ADMIN){
-            throw new RuntimeException("Admin role not allowed");
-        }
+    public UserResponse createOrganizer(UserRequest request) {
 
         User organizer = new User();
-        organizer.setUsername(username);
-        organizer.setEmail(email);
-        organizer.setPassword(passwordEncoder.encode(password));
+        organizer.setUsername(request.username());
+        organizer.setEmail(request.email());
+        organizer.setPassword(passwordEncoder.encode(request.password()));
         organizer.setRole(UserRoles.ORGANIZER);
 
-        return userRepository.save(organizer);
+        User saved = userRepository.save(organizer);
+
+        return UserResponse.from(saved);
     }
 }
