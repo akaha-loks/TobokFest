@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/artists")
+@RequestMapping("/api/admin/artists")
 public class ArtistController {
 
     private final ArtistService artistService;

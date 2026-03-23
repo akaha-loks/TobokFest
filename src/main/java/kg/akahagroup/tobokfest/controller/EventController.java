@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/events")
+@RequestMapping("/api/admin/events")
 public class EventController {
 
     private final EventService eventService;
