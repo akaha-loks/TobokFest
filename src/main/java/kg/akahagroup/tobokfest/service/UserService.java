@@ -3,6 +3,7 @@ package kg.akahagroup.tobokfest.service;
 import kg.akahagroup.tobokfest.dto.request.UserRequest;
 import kg.akahagroup.tobokfest.dto.response.UserResponse;
 import kg.akahagroup.tobokfest.enums.UserRoles;
+import kg.akahagroup.tobokfest.exception.ResourceNotFoundException;
 import kg.akahagroup.tobokfest.model.User;
 import kg.akahagroup.tobokfest.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,6 +38,11 @@ public class UserService {
     }
 
     public UserResponse createOrganizer(UserRequest request) {
+        userRepository.findByEmail(request.email())
+                .ifPresent(u -> { throw new IllegalArgumentException("Email already in use"); });
+
+        userRepository.findByUsername(request.username())
+                .ifPresent(u -> { throw new IllegalArgumentException("Username already in use"); });
 
         User organizer = new User();
         organizer.setUsername(request.username());
@@ -47,5 +53,11 @@ public class UserService {
         User saved = userRepository.save(organizer);
 
         return UserResponse.from(saved);
+    }
+
+    public UserResponse getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        return UserResponse.from(user);
     }
 }

@@ -2,6 +2,7 @@ package kg.akahagroup.tobokfest.service;
 
 import kg.akahagroup.tobokfest.dto.request.ArtistRequest;
 import kg.akahagroup.tobokfest.dto.response.ArtistResponse;
+import kg.akahagroup.tobokfest.exception.ResourceNotFoundException;
 import kg.akahagroup.tobokfest.model.Artist;
 import kg.akahagroup.tobokfest.repository.ArtistRepository;
 import org.springframework.stereotype.Service;
@@ -26,13 +27,12 @@ public class ArtistService {
 
     public ArtistResponse getArtist(Long id) {
         Artist artist = artistRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Artist with id " + id + " not found"));
 
         return ArtistResponse.from(artist);
     }
 
     public ArtistResponse createArtist(ArtistRequest request) {
-
         Artist artist = new Artist();
         artist.setName(request.name());
         artist.setSurname(request.surname());
@@ -41,9 +41,8 @@ public class ArtistService {
     }
 
     public ArtistResponse updateArtist(Long id, ArtistRequest request) {
-
         Artist artist = artistRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Artist with id " + id + " not found"));
 
         artist.setName(request.name());
         artist.setSurname(request.surname());
@@ -52,15 +51,13 @@ public class ArtistService {
     }
 
     public void deleteArtist(Long id) {
-
         Artist artist = artistRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Artist not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Artist with id " + id + " not found"));
 
         artistRepository.delete(artist);
     }
 
     public List<ArtistResponse> searchArtists(String query) {
-
         return artistRepository
                 .findByNameContainingIgnoreCaseOrSurnameContainingIgnoreCase(query, query)
                 .stream()

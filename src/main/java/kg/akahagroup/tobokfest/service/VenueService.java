@@ -2,6 +2,7 @@ package kg.akahagroup.tobokfest.service;
 
 import kg.akahagroup.tobokfest.dto.request.VenueRequest;
 import kg.akahagroup.tobokfest.dto.response.VenueResponse;
+import kg.akahagroup.tobokfest.exception.ResourceNotFoundException;
 import kg.akahagroup.tobokfest.model.Venue;
 import kg.akahagroup.tobokfest.repository.VenueRepository;
 import org.springframework.stereotype.Service;
@@ -39,14 +40,14 @@ public class VenueService {
 
     public VenueResponse getById(Long id) {
         Venue venue = venueRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Venue not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Venue with id " + id + " not found"));
 
         return mapToResponse(venue);
     }
 
     public VenueResponse update(Long id, VenueRequest request) {
         Venue venue = venueRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Venue not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Venue with id " + id + " not found"));
 
         venue.setName(request.name());
         venue.setOblast(request.oblast());
@@ -59,7 +60,9 @@ public class VenueService {
     }
 
     public void delete(Long id) {
-        venueRepository.deleteById(id);
+        Venue venue = venueRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Venue with id " + id + " not found"));
+        venueRepository.delete(venue);
     }
 
     private VenueResponse mapToResponse(Venue venue) {

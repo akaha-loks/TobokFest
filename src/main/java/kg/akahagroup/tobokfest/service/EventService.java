@@ -2,8 +2,10 @@ package kg.akahagroup.tobokfest.service;
 
 import kg.akahagroup.tobokfest.dto.request.EventRequest;
 import kg.akahagroup.tobokfest.dto.response.EventResponse;
+import kg.akahagroup.tobokfest.exception.ResourceNotFoundException;
 import kg.akahagroup.tobokfest.model.*;
 import kg.akahagroup.tobokfest.repository.*;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -30,19 +32,18 @@ public class EventService {
     }
 
     public EventResponse createEvent(EventRequest request) {
-
-        String username = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User owner = userRepository.findByUsername(username)
-                .orElseThrow();
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Venue venue = venueRepository.findById(request.venueId())
-                .orElseThrow();
+                .orElseThrow(() -> new ResourceNotFoundException("Venue not found"));
 
         List<Artist> artists = artistRepository.findAllById(request.artistIds());
+        if (artists.isEmpty()) {
+            throw new ResourceNotFoundException("No artists found for given IDs");
+        }
 
         Event event = new Event();
         event.setTitle(request.title());
@@ -58,22 +59,21 @@ public class EventService {
     }
 
     public EventResponse updateEvent(Long id, EventRequest request) {
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
-        Event event = eventRepository.findById(id).orElseThrow();
-
-        String username = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
-
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         if (!event.getOwner().getUsername().equals(username)) {
-            throw new RuntimeException("You are not owner of this event");
+            throw new AccessDeniedException("You are not the owner of this event");
         }
 
         Venue venue = venueRepository.findById(request.venueId())
-                .orElseThrow();
+                .orElseThrow(() -> new ResourceNotFoundException("Venue not found"));
 
         List<Artist> artists = artistRepository.findAllById(request.artistIds());
+        if (artists.isEmpty()) {
+            throw new ResourceNotFoundException("No artists found for given IDs");
+        }
 
         event.setTitle(request.title());
         event.setDescription(request.description());
@@ -87,16 +87,12 @@ public class EventService {
     }
 
     public void deleteEvent(Long id) {
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
-        Event event = eventRepository.findById(id).orElseThrow();
-
-        String username = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
-
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         if (!event.getOwner().getUsername().equals(username)) {
-            throw new RuntimeException("You are not owner of this event");
+            throw new AccessDeniedException("You are not the owner of this event");
         }
 
         eventRepository.delete(event);
@@ -109,14 +105,8 @@ public class EventService {
                 .toList();
     }
 
-    public List<EventResponse> getEvents(
-            String title,
-            String genre,
-            String city,
-            LocalDateTime start,
-            LocalDateTime end
-    ) {
-
+    public List<EventResponse> getEvents(String title, String genre, String city,
+                                         LocalDateTime start, LocalDateTime end) {
         return eventRepository
                 .findEvents(title, genre, city, start, end)
                 .stream()
