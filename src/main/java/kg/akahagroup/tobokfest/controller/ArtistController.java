@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/artists")
-@Tag(name = "Artist", description = "CRUD операции для артистов (админ)")
+@Tag(name = "Admin Artists", description = "Управление артистами (только ADMIN)")
 public class ArtistController {
 
     private static final Logger log = LoggerFactory.getLogger(ArtistController.class);
@@ -27,22 +27,15 @@ public class ArtistController {
         this.artistService = artistService;
     }
 
-    @Operation(summary = "Получить всех артистов")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Артисты успешно получены")
-    })
     @GetMapping
+    @Operation(summary = "Получить всех артистов")
     public ResponseEntity<List<ArtistResponse>> getAllArtists() {
         List<ArtistResponse> artists = artistService.getAllArtists();
         return ResponseEntity.ok(artists);
     }
 
-    @Operation(summary = "Получить артиста по ID")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Артист найден"),
-            @ApiResponse(responseCode = "404", description = "Артист не найден")
-    })
     @GetMapping("/{id}")
+    @Operation(summary = "Получить артиста по ID")
     public ResponseEntity<ArtistResponse> getArtist(@PathVariable Long id) {
         try {
             ArtistResponse artist = artistService.getArtist(id);
@@ -53,12 +46,8 @@ public class ArtistController {
         }
     }
 
-    @Operation(summary = "Создать артиста", description = "Добавляет нового артиста")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Артист успешно создан"),
-            @ApiResponse(responseCode = "400", description = "Некорректные данные")
-    })
     @PostMapping
+    @Operation(summary = "Создать артиста")
     public ResponseEntity<ArtistResponse> createArtist(@RequestBody ArtistRequest request) {
         try {
             ArtistResponse artist = artistService.createArtist(request);
@@ -69,13 +58,8 @@ public class ArtistController {
         }
     }
 
-    @Operation(summary = "Обновить артиста")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Артист успешно обновлен"),
-            @ApiResponse(responseCode = "400", description = "Некорректные данные"),
-            @ApiResponse(responseCode = "404", description = "Артист не найден")
-    })
     @PutMapping("/{id}")
+    @Operation(summary = "Обновить артиста")
     public ResponseEntity<ArtistResponse> updateArtist(
             @PathVariable Long id,
             @RequestBody ArtistRequest request) {
@@ -88,12 +72,8 @@ public class ArtistController {
         }
     }
 
-    @Operation(summary = "Удалить артиста")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Артист успешно удален"),
-            @ApiResponse(responseCode = "404", description = "Артист не найден")
-    })
     @DeleteMapping("/{id}")
+    @Operation(summary = "Удалить артиста")
     public ResponseEntity<Void> deleteArtist(@PathVariable Long id) {
         try {
             artistService.deleteArtist(id);
@@ -104,11 +84,8 @@ public class ArtistController {
         }
     }
 
-    @Operation(summary = "Поиск артистов по имени или фамилии")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Артисты успешно найдены")
-    })
     @GetMapping("/search")
+    @Operation(summary = "Поиск артистов по имени или фамилии")
     public ResponseEntity<List<ArtistResponse>> searchArtists(@RequestParam String query) {
         List<ArtistResponse> artists = artistService.searchArtists(query);
         return ResponseEntity.ok(artists);

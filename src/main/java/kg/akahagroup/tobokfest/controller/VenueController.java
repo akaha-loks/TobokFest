@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/venues")
-@Tag(name = "Venue", description = "CRUD операции для площадок (админ)")
+@Tag(name = "Admin Venues", description = "Управление площадками (только ADMIN)")
 public class VenueController {
 
     private static final Logger log = LoggerFactory.getLogger(VenueController.class);
@@ -29,10 +29,6 @@ public class VenueController {
 
     @PostMapping
     @Operation(summary = "Создание площадки")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Площадка успешно создана"),
-            @ApiResponse(responseCode = "400", description = "Ошибка данных запроса")
-    })
     public ResponseEntity<VenueResponse> create(@RequestBody VenueRequest request) {
         try {
             VenueResponse venue = venueService.create(request);
@@ -52,10 +48,6 @@ public class VenueController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить площадку по ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Площадка найдена"),
-            @ApiResponse(responseCode = "404", description = "Площадка не найдена")
-    })
     public ResponseEntity<VenueResponse> getById(@PathVariable Long id) {
         try {
             VenueResponse venue = venueService.getById(id);
@@ -68,11 +60,6 @@ public class VenueController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Обновить площадку")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Площадка успешно обновлена"),
-            @ApiResponse(responseCode = "400", description = "Ошибка данных запроса"),
-            @ApiResponse(responseCode = "404", description = "Площадка не найдена")
-    })
     public ResponseEntity<VenueResponse> update(@PathVariable Long id,
                                                 @RequestBody VenueRequest request) {
         try {
@@ -86,10 +73,6 @@ public class VenueController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Удалить площадку")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Площадка успешно удалена"),
-            @ApiResponse(responseCode = "404", description = "Площадка не найдена")
-    })
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         try {
             venueService.delete(id);

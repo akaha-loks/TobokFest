@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/users")
-@Tag(name = "User", description = "CRUD операции для пользователей (админ)")
+@Tag(name = "Admin Users", description = "Управление пользователями (только ADMIN)")
 public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
@@ -28,9 +28,6 @@ public class UserController {
     }
 
     @Operation(summary = "Получить всех админов и организаторов")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Список пользователей успешно получен")
-    })
     @GetMapping
     public ResponseEntity<List<UserResponse>> getAdminsAndOrganizers() {
         List<UserResponse> users = userService.getAdminsAndOrganizers();
@@ -38,9 +35,6 @@ public class UserController {
     }
 
     @Operation(summary = "Получить только организаторов")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Список организаторов успешно получен")
-    })
     @GetMapping("/organizers")
     public ResponseEntity<List<UserResponse>> getOrganizers() {
         List<UserResponse> organizers = userService.getOrganizers();
@@ -48,10 +42,6 @@ public class UserController {
     }
 
     @Operation(summary = "Создать нового организатора")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Организатор успешно создан"),
-            @ApiResponse(responseCode = "400", description = "Неверные данные")
-    })
     @PostMapping("/organizer")
     public ResponseEntity<UserResponse> createOrganizer(@RequestBody UserRequest request) {
         try {
