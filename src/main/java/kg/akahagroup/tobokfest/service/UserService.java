@@ -1,5 +1,6 @@
 package kg.akahagroup.tobokfest.service;
 
+import kg.akahagroup.tobokfest.dto.request.UpdateUserRequest;
 import kg.akahagroup.tobokfest.dto.request.UserRequest;
 import kg.akahagroup.tobokfest.dto.response.UserResponse;
 import kg.akahagroup.tobokfest.enums.UserRoles;
@@ -59,5 +60,28 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         return UserResponse.from(user);
+    }
+
+    public UserResponse updateUser(Long id, UpdateUserRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        if (request.username() != null && !request.username().isBlank()) {
+            user.setUsername(request.username());
+        }
+        if (request.email() != null && !request.email().isBlank()) {
+            user.setEmail(request.email());
+        }
+        if (request.password() != null && !request.password().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.password()));
+        }
+
+        return UserResponse.from(userRepository.save(user));
+    }
+
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        userRepository.delete(user);
     }
 }

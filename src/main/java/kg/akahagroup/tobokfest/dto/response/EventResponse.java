@@ -14,13 +14,20 @@ public record EventResponse(
         String genre,
         int price,
         Long venueId,
+        String venueName,
         List<Long> artistIds,
+        List<String> artistNames,
         Long ownerId
 ) {
     public static EventResponse from(Event event) {
         List<Long> artistIds = event.getArtists()
                 .stream()
                 .map(Artist::getId)
+                .toList();
+
+        List<String> artistNames = event.getArtists()
+                .stream()
+                .map(a -> a.getName() + " " + a.getSurname())
                 .toList();
 
         return new EventResponse(
@@ -31,7 +38,9 @@ public record EventResponse(
                 event.getGenre(),
                 event.getPrice(),
                 event.getVenue().getId(),
+                event.getVenue().getName(),
                 artistIds,
+                artistNames,
                 event.getOwner().getId()
         );
     }

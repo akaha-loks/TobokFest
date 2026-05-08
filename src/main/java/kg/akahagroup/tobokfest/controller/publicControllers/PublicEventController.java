@@ -1,8 +1,6 @@
 package kg.akahagroup.tobokfest.controller.publicControllers;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kg.akahagroup.tobokfest.dto.response.EventResponse;
 import kg.akahagroup.tobokfest.service.EventService;
@@ -27,15 +25,13 @@ public class PublicEventController {
     @Operation(summary = "Получить все события (публичный каталог)")
     @GetMapping
     public ResponseEntity<List<EventResponse>> getAllEvents() {
-        List<EventResponse> events = eventService.getAllEvents();
-        return ResponseEntity.ok(events);
+        return ResponseEntity.ok(eventService.getAllEvents());
     }
 
     @Operation(summary = "Получить событие по ID")
     @GetMapping("/{id}")
     public ResponseEntity<EventResponse> getEventById(@PathVariable Long id) {
-        EventResponse event = eventService.getEventById(id);
-        return ResponseEntity.ok(event);
+        return ResponseEntity.ok(eventService.getEventById(id));
     }
 
     @Operation(summary = "Поиск событий с фильтрацией")
@@ -47,7 +43,18 @@ public class PublicEventController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
 
-        List<EventResponse> events = eventService.searchEvents(title, genre, city, startDate, endDate);
-        return ResponseEntity.ok(events);
+        return ResponseEntity.ok(eventService.searchEvents(title, genre, city, startDate, endDate));
+    }
+
+    @Operation(summary = "Получить уникальные жанры событий")
+    @GetMapping("/genres")
+    public ResponseEntity<List<String>> getGenres() {
+        return ResponseEntity.ok(eventService.getDistinctGenres());
+    }
+
+    @Operation(summary = "Получить уникальные города событий")
+    @GetMapping("/cities")
+    public ResponseEntity<List<String>> getCities() {
+        return ResponseEntity.ok(eventService.getDistinctCities());
     }
 }

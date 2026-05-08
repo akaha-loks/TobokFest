@@ -1,9 +1,9 @@
 package kg.akahagroup.tobokfest.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import kg.akahagroup.tobokfest.dto.request.UpdateUserRequest;
 import kg.akahagroup.tobokfest.dto.request.UserRequest;
 import kg.akahagroup.tobokfest.dto.response.UserResponse;
 import kg.akahagroup.tobokfest.service.UserService;
@@ -43,13 +43,37 @@ public class UserController {
 
     @Operation(summary = "Создать нового организатора")
     @PostMapping("/organizer")
-    public ResponseEntity<UserResponse> createOrganizer(@RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> createOrganizer(@Valid @RequestBody UserRequest request) {
         try {
             log.info("Creating organizer: {}", request.username());
             UserResponse organizer = userService.createOrganizer(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(organizer);
         } catch (Exception e) {
             log.error("Failed to create organizer: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @Operation(summary = "Обновить пользователя")
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
+        try {
+            UserResponse updated = userService.updateUser(id, request);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            log.error("Failed to update user: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @Operation(summary = "Удалить пользователя")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            log.error("Failed to delete user: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }

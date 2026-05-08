@@ -40,13 +40,12 @@ public class EventService {
 
     @Transactional
     public EventResponse createEventByAdmin(EventRequest request) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.info("Admin {} creating event", username);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("Admin {} creating event", email);
 
-        User owner = userRepository.findByUsername(username)
+        User owner = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Проверяем, что пользователь имеет роль ADMIN
         if (owner.getRole() != UserRoles.ADMIN) {
             throw new AccessDeniedException("Only ADMIN can create events through admin endpoint");
         }
@@ -56,10 +55,10 @@ public class EventService {
 
     @Transactional
     public EventResponse updateEventByAdmin(Long id, EventRequest request) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.info("Admin {} updating event {}", username, id);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("Admin {} updating event {}", email, id);
 
-        User admin = userRepository.findByUsername(username)
+        User admin = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (admin.getRole() != UserRoles.ADMIN) {
@@ -74,10 +73,10 @@ public class EventService {
 
     @Transactional
     public void deleteEventByAdmin(Long id) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.info("Admin {} deleting event {}", username, id);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("Admin {} deleting event {}", email, id);
 
-        User admin = userRepository.findByUsername(username)
+        User admin = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (admin.getRole() != UserRoles.ADMIN) {
@@ -88,19 +87,18 @@ public class EventService {
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
         eventRepository.delete(event);
-        log.info("Event {} deleted by admin {}", id, username);
+        log.info("Event {} deleted by admin {}", id, email);
     }
 
     // ==================== ORGANIZER METHODS ====================
 
     @Transactional
-    public EventResponse createEventByOrganizer(EventRequest request, String username) {
-        log.info("Organizer {} creating event", username);
+    public EventResponse createEventByOrganizer(EventRequest request, String email) {
+        log.info("Organizer {} creating event", email);
 
-        User owner = userRepository.findByUsername(username)
+        User owner = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Проверяем, что пользователь имеет роль ORGANIZER
         if (owner.getRole() != UserRoles.ORGANIZER) {
             throw new AccessDeniedException("Only ORGANIZER can create events through organizer endpoint");
         }
@@ -109,14 +107,13 @@ public class EventService {
     }
 
     @Transactional
-    public EventResponse updateEventByOrganizer(Long id, EventRequest request, String username) {
-        log.info("Organizer {} updating event {}", username, id);
+    public EventResponse updateEventByOrganizer(Long id, EventRequest request, String email) {
+        log.info("Organizer {} updating event {}", email, id);
 
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
-        // Проверяем, что событие принадлежит этому организатору
-        if (!event.getOwner().getUsername().equals(username)) {
+        if (!event.getOwner().getEmail().equals(email)) {
             throw new AccessDeniedException("You can only update your own events");
         }
 
@@ -124,25 +121,24 @@ public class EventService {
     }
 
     @Transactional
-    public void deleteEventByOrganizer(Long id, String username) {
-        log.info("Organizer {} deleting event {}", username, id);
+    public void deleteEventByOrganizer(Long id, String email) {
+        log.info("Organizer {} deleting event {}", email, id);
 
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
-        // Проверяем, что событие принадлежит этому организатору
-        if (!event.getOwner().getUsername().equals(username)) {
+        if (!event.getOwner().getEmail().equals(email)) {
             throw new AccessDeniedException("You can only delete your own events");
         }
 
         eventRepository.delete(event);
-        log.info("Event {} deleted by organizer {}", id, username);
+        log.info("Event {} deleted by organizer {}", id, email);
     }
 
-    public List<EventResponse> getEventsByOrganizer(String username) {
-        log.info("Getting events for organizer: {}", username);
+    public List<EventResponse> getEventsByOrganizer(String email) {
+        log.info("Getting events for organizer: {}", email);
 
-        User organizer = userRepository.findByUsername(username)
+        User organizer = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         return eventRepository.findByOwner(organizer)
@@ -173,10 +169,22 @@ public class EventService {
         log.info("Searching events - title: {}, genre: {}, city: {}, start: {}, end: {}",
                 title, genre, city, startDate, endDate);
 
-        return eventRepository.findEvents(title, genre, city, startDate, endDate)
-                .stream()
+        return eventRepository.findAll().stream()
+                .filter(e -> title == null || e.getTitle().toLowerCase().contains(title.toLowerCase()))
+                .filter(e -> genre == null || e.getGenre().equalsIgnoreCase(genre))
+                .filter(e -> city == null || e.getVenue().getCity().toLowerCase().contains(city.toLowerCase()))
+                .filter(e -> startDate == null || !e.getDate().isBefore(startDate))
+                .filter(e -> endDate == null || !e.getDate().isAfter(endDate))
                 .map(EventResponse::from)
                 .toList();
+    }
+
+    public List<String> getDistinctGenres() {
+        return eventRepository.findDistinctGenres();
+    }
+
+    public List<String> getDistinctCities() {
+        return eventRepository.findDistinctCities();
     }
 
     // ==================== INTERNAL METHODS ====================
