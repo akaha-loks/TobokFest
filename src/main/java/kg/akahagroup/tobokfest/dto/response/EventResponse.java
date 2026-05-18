@@ -13,13 +13,22 @@ public record EventResponse(
         LocalDateTime date,
         String genre,
         int price,
+
         Long venueId,
         String venueName,
+        String venueCity,
+        String venueAddress,
+        String venueOblast,
+        int venueCapacity,
+
         List<Long> artistIds,
         List<String> artistNames,
+
         Long ownerId
 ) {
+
     public static EventResponse from(Event event) {
+
         List<Long> artistIds = event.getArtists()
                 .stream()
                 .map(Artist::getId)
@@ -37,10 +46,17 @@ public record EventResponse(
                 event.getDate(),
                 event.getGenre(),
                 event.getPrice(),
+
                 event.getVenue().getId(),
                 event.getVenue().getName(),
+                event.getVenue().getCity(),
+                event.getVenue().getAddress(),
+                event.getVenue().getOblast().getLabel(),
+                event.getVenue().getCapacity(),
+
                 artistIds,
                 artistNames,
+
                 event.getOwner().getId()
         );
     }
